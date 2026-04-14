@@ -23,7 +23,6 @@ class FileChatMessageHistory(BaseChatMessageHistory):
 
     @property
     def messages(self):
-        # 核心修正：如果路径是个目录而不是文件，返回空列表，避免权限报错
         if not os.path.exists(self.file_path) or os.path.isdir(self.file_path):
             return []
         try:
@@ -38,7 +37,6 @@ class FileChatMessageHistory(BaseChatMessageHistory):
         current_messages.extend(messages)
 
         messages_dict = [message_to_dict(m) for m in current_messages]
-        # 确保以文件模式写入
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(messages_dict, f, ensure_ascii=False, indent=2)
 
