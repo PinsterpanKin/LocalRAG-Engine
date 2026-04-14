@@ -3,7 +3,7 @@ import streamlit as st
 from knowledge_base import KnowledgeBaseService
 st.title("data bases updating service")
 uploader_file=st.file_uploader(
-    "上传txt文件",
+    "please upload txt files",
     type=['txt'],
     accept_multiple_files=False,
 )
@@ -19,7 +19,7 @@ if uploader_file is not None:
     file_size=uploader_file.size/1024#KB
 
     st.subheader(f"{file_name}")
-    st.write(f"格式:{file_type},大小:{file_size:.2f}")
+    st.write(f"type:{file_type},size:{file_size:.2f}")
 
     text=uploader_file.getvalue().decode("utf-8")
 
