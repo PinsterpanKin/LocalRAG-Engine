@@ -29,7 +29,6 @@ class RagService:
     def _get_chain(self):
         retriever = self.vector_service.get_retriever()
 
-        # 核心修正 1：确保提取出字符串，且处理可能的复杂输入
         def extract_input(value):
             if isinstance(value, dict):
                 return value.get("input", "")
@@ -39,17 +38,15 @@ class RagService:
             if not docs: return "No documents found"
             return "\n\n".join([f"page:{doc.page_content}" for doc in docs])
 
-        # 核心修正 2：这里必须把 history 接住并传给下一个环节
         def format_for_prompt_template(value):
             return {
                 "input": value["input"],
                 "context": value["context"],
-                "history": value.get("history", [])  # 使用 .get 增强健壮性
+                "history": value.get("history", [])  
             }
 
         chain = (
                 {
-                    # 这里是关键！必须显式声明 history
                     "input": RunnablePassthrough(),
                     "context": RunnableLambda(extract_input) | retriever | format_document,
                     "history": RunnablePassthrough()
