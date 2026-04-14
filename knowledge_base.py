@@ -10,7 +10,6 @@ from datetime import datetime
 
 def check_md5(md5_str: str):
     if not os.path.exists(config.md5_path):
-        # 确保目录存在
         os.makedirs(os.path.dirname(config.md5_path), exist_ok=True)
         open(config.md5_path, 'w', encoding='utf-8').close()
         return False
