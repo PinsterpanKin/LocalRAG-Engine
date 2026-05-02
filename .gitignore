@@ -1,0 +1,22 @@
+#Initialized by PinsterpanKim
+# 1.Ignoring Python bytecode and cache files (common practice)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 2. Ignoring virtual environment files (very important, can be very large)
+venv/
+.venv/
+env/
+
+# 3. Ignoring sensitive information (to prevent leaking API keys)
+.env
+
+# 4. Ignoring system files and IDE configuration
+.DS_Store
+.vscode/
+
+# 5. Ignoring local indices or data that RAG projects might generate
+data/
+index_storage/
+*.log
