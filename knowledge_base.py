@@ -1,11 +1,13 @@
 
 import hashlib
+import io
 import os
 import config_data as config
+from datetime import datetime
+from bs4 import BeautifulSoup
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from datetime import datetime
 
 
 def check_md5(md5_str: str):
@@ -33,6 +35,51 @@ def get_string_md5(input_str: str, encoding='utf-8'):
     return md5_obj.hexdigest()
 
 
+def get_file_extension(filename: str) -> str:
+    return os.path.splitext(filename.lower())[1]
+
+
+def parse_text_from_bytes(file_bytes: bytes, filename: str) -> str:
+    file_ext = get_file_extension(filename)
+    if file_ext in ['.txt', '.md']:
+        return file_bytes.decode('utf-8', errors='ignore')
+
+    if file_ext in ['.html', '.htm']:
+        html_text = file_bytes.decode('utf-8', errors='ignore')
+        soup = BeautifulSoup(html_text, 'html.parser')
+        return soup.get_text(separator='\n')
+
+    if file_ext == '.pdf':
+        try:
+            from pypdf import PdfReader
+        except ImportError:
+            try:
+                from PyPDF2 import PdfReader
+            except ImportError as exc:
+                raise ImportError(
+                    'PDF parsing requires pypdf or PyPDF2. Install with `pip install pypdf`'
+                ) from exc
+
+        with io.BytesIO(file_bytes) as pdf_buffer:
+            reader = PdfReader(pdf_buffer)
+            pages = [page.extract_text() or '' for page in reader.pages]
+        return '\n'.join(pages)
+
+    if file_ext == '.docx':
+        try:
+            from docx import Document as DocxDocument
+        except ImportError as exc:
+            raise ImportError(
+                'DOCX parsing requires python-docx. Install with `pip install python-docx`'
+            ) from exc
+
+        with io.BytesIO(file_bytes) as docx_buffer:
+            document = DocxDocument(docx_buffer)
+            return '\n'.join([paragraph.text for paragraph in document.paragraphs])
+
+    raise ValueError(f'Unsupported file type: {file_ext}')
+
+
 class KnowledgeBaseService(object):
     def __init__(self):
         os.makedirs(config.persist_directory, exist_ok=True)
@@ -42,7 +89,7 @@ class KnowledgeBaseService(object):
 
         self.chroma = Chroma(
             collection_name=config.collection_name,
-            embedding_function=self.embeddings,  
+            embedding_function=self.embeddings,
             persist_directory=config.persist_directory
         )
 
@@ -56,16 +103,14 @@ class KnowledgeBaseService(object):
     def upload_by_str(self, data: str, filename):
         md5_hex = get_string_md5(data)
         if check_md5(md5_hex):
-            return "[skip]"
-
+            return '[skip]'
 
         knowledge_chunks = self.spliter.split_text(data)
 
-
         metadatas = [{
-            "source": filename,
-            "created_at": str(datetime.now()),  
-            "operator": "lawson",
+            'source': filename,
+            'created_at': str(datetime.now()),
+            'operator': 'lawson',
         } for _ in knowledge_chunks]
 
         self.chroma.add_texts(
@@ -74,5 +119,5 @@ class KnowledgeBaseService(object):
         )
 
         save_md5(md5_hex)
-        return "[success]"
+        return '[success]'
 
