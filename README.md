@@ -50,9 +50,9 @@ streamlit run app_file_uploader.py
 
 *   **Step 2: Start Chatting**
     Open the QA interface to interact with your data:
-    ```bash
-    streamlit run app_qa.py
-    ```
+```bash
+streamlit run app_qa.py
+```
 
 ## 📁 Current Project Structure
 *   `app_file_uploader.py`: UI for uploading and processing text files[cite: 1].
