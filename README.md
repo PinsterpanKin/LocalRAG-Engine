@@ -5,7 +5,7 @@ This is a localized **RAG (Retrieval-Augmented Generation)** system built with *
 ## 👀 1.Project Overview
 
 ### 🌟 Key Features
-*   **Knowledge Base Management**: Upload `.txt` files to create a searchable local vector database[cite: 1, 4].
+*   **Knowledge Base Management**: Upload `.txt` `.md` `.pdf` `.html` `.docx` files to create a searchable local vector database[cite: 1, 4].
 *   **Intelligent Retrieval**: Uses the `bge-m3` embedding model to find the most relevant context for your questions[cite: 4, 6].
 *   **Context-Aware Chat**: Powered by `llama3`, the system answers questions based specifically on your uploaded documents[cite: 5].
 *   **Persistent Memory**: Chat history is saved locally in JSON format, allowing the AI to remember previous parts of the conversation[cite: 3].
