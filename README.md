@@ -1,71 +1,129 @@
-# Local RAG System: Retrieval-Augmented Generation
+git clone <https://github.com/PinsterpanKin/LocalRAG-Engine>
+available on GitHub, so just feel free to use and modify it for your own local AI 
+# Local Retrieval Augmented Generation Engine
 
-This is a localized **RAG (Retrieval-Augmented Generation)** system built with **LangChain**, **Streamlit**, and **Ollama**. It allows you to upload private text documents and chat with them using local Large Language Models (LLMs), ensuring total data privacy.
+This repository is a local Retrieval-Augmented Generation (RAG) system combining
+LangChain, ChromaDB, Streamlit and Ollama. It lets you upload private documents
+and chat with them locally using Ollama-powered LLMs.
 
-## 👀 1.Project Overview
+## 👀 Project Overview
 
 ### 🌟 Key Features
-*   **Knowledge Base Management**: Upload `.txt` files to create a searchable local vector database[cite: 1, 4].
-*   **Intelligent Retrieval**: Uses the `bge-m3` embedding model to find the most relevant context for your questions[cite: 4, 6].
-*   **Context-Aware Chat**: Powered by `llama3`, the system answers questions based specifically on your uploaded documents[cite: 5].
-*   **Persistent Memory**: Chat history is saved locally in JSON format, allowing the AI to remember previous parts of the conversation[cite: 3].
-*   **MD5 Deduplication**: Automatically skips files that have already been processed to save time and storage[cite: 4].
+- **Knowledge Base Management** — Upload `.txt`, `.md`, `.pdf`, `.html`, `.docx` files and index them into a local vector store.
+- **Intelligent Retrieval** — Uses the `bge-m3` embedding model (via Ollama) to find relevant context.
+- **Context-Aware Chat** — Answers questions based on your documents using `llama3` (run via Ollama).
+- **Persistent Memory** — Chat history and metadata are saved locally for continuity.
+- **MD5 Deduplication** — Uploaded files are skipped if identical content has already been indexed.
 
 ### 🛠️ Tech Stack
-*   **Core Framework**: LangChain
-*   **User Interface**: Streamlit
-*   **Vector Database**: ChromaDB
-*   **Local LLM Engine**: Ollama (Llama3 & BGE-M3)
-*   **Programming Language**: Python
+- **Core Framework**: LangChain
+- **UI**: Streamlit (`app_file_uploader.py`, `app_qa.py`)
+- **Vector DB**: ChromaDB (persisted to `chroma_db/`)
+- **Local LLM Engine**: Ollama (models: `llama3`, `bge-m3`)
+- **Language**: Python 3.12
 
-### 🚀 Quick Start
+## 🚀 Quick Start
 
-#### 1. Prerequisites
-Install [Ollama](https://ollama.com/) and download the required models:
+### 1) Create and activate a virtual environment
+
 ```bash
-ollama pull llama3
-ollama pull bge-m3
+python -m venv venv
+source venv/bin/activate
 ```
 
-## 📥 2.Installation
+### 2) Install Python dependencies (example)
 
-### Clone the repo
-git clone <our-link>
-cd <your-folder>
-
-### Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows use: .\venv\Scripts\activate
-
-### Install requirements
-pip install streamlit langchain langchain-ollama langchain-chroma langchain-community langchain-text-splitters
-
-## 💻 3.Running the App
-
-*   **Step 1: Upload Documents**
-    Run the uploader to index your knowledge, you can type following command on Linux:
 ```bash
-streamlit run app_file_uploader.py
-```   
+./venv/bin/python -m pip install --upgrade pip setuptools wheel
+./venv/bin/python -m pip install \
+  streamlit langchain langchain-ollama langchain-chroma \
+  langchain-text-splitters chromadb beautifulsoup4 python-docx \
+  pypdf PyPDF2
+```
 
-*   **Step 2: Start Chatting**
-    Open the QA interface to interact with your data:
-    ```bash
-    streamlit run app_qa.py
-    ```
+## Ollama (local LLM) — install & models
 
-## 📁 Current Project Structure
-*   `app_file_uploader.py`: UI for uploading and processing text files[cite: 1].
-*   `app_qa.py`: Main chat interface for the AI service[cite: 2].
-*   `rag.py`: The core RAG logic and LangChain pipeline[cite: 5].
-*   `knowledge_base.py`: Handles text splitting and vector embedding[cite: 4].
-*   `vector_stores.py`: Manages the connection to the Chroma vector store[cite: 6].
-*   `file_history_store.py`: Manages saving and loading chat history from local files[cite: 3].
+This project relies on a locally-running Ollama API. Install Ollama and pull models:
 
-## 🛡️ About License
-This project is for educational purposes. More previous examples with different focus are  
-available on GitHub, so just feel free to use and modify it for your own local AI 
-experiments.
+1. Install `zstd` (required by installer) and run installer:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y zstd
+curl -fsSL https://ollama.com/install.sh -o /tmp/ollama-install.sh
+sudo bash /tmp/ollama-install.sh
+rm -f /tmp/ollama-install.sh
+```
+
+2. Pull the example models used by this repo:
+
+```bash
+/usr/local/bin/ollama pull llama3
+/usr/local/bin/ollama pull bge-m3
+```
+
+3. Confirm Ollama is listening on the default API port:
+
+```bash
+ss -ltnp | grep 11434 || true
+ollama ps
+```
+
+If you need to run a model directly:
+
+```bash
+ollama run llama3
+```
+
+## Running the Streamlit apps
+
+Start the uploader (index documents):
+
+```bash
+./venv/bin/streamlit run app_file_uploader.py
+```
+
+Start the QA chat interface:
+
+```bash
+./venv/bin/streamlit run app_qa.py
+```
+
+If Streamlit prints `gio: http://localhost:8501: Operation not supported` on WSL, open the Local URL manually in your browser.
+
+## Configuration and storage
+
+- `config_data.py` defines:
+  - `persist_directory` — where ChromaDB stores vectors (default: `chroma_db/`)
+  - `md5_path` — `history/md5.txt` used to deduplicate uploads
+  - chunking settings used by `knowledge_base.py`
+
+## Project structure
+
+- `app_file_uploader.py` — Streamlit uploader & indexer
+- `app_qa.py` — Streamlit chat frontend
+- `knowledge_base.py` — parsing, splitting and Chroma ingestion
+- `vector_stores.py` — Chroma vector store helper
+- `file_history_store.py` — local JSON chat history
+- `rag.py` — RAG pipeline wiring with LangChain + Ollama
+
+## Notes & Troubleshooting
+
+- If you see "failed to connect to Ollama", ensure:
+  - Ollama is installed and the API is running (`ollama ps`).
+  - Required models have been pulled (`ollama pull ...`).
+- To verify Python imports in the venv:
+
+```bash
+./venv/bin/python -c "import streamlit, langchain, langchain_ollama, chromadb, bs4, docx, pypdf; print('import-ok')"
+```
+
+## Support
+
+I can:
+
+- Add a `requirements.txt` for reproducible installs.
+- Create a short `SHUTDOWN.md` checklist to stop apps and save terminal history.
 
 ---
-*Last updated: May 2nd 2026*
+Last updated: 2026-08-13
