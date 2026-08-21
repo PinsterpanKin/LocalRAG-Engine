@@ -1,17 +1,56 @@
 #file_history_store.py
 import os
 import json
+from datetime import datetime
+from urllib.parse import quote, unquote
 from langchain_core.messages import message_to_dict, messages_from_dict
 from langchain_core.chat_history import BaseChatMessageHistory
 
+HISTORY_DIRECTORY = "chat_history"
+
+
+def _history_path(session_id):
+    safe_session_id = quote(str(session_id), safe="")
+    return os.path.join(HISTORY_DIRECTORY, f"{safe_session_id}.json")
+
 
 def get_history(session_id):
-    directory = "chat_history"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    os.makedirs(HISTORY_DIRECTORY, exist_ok=True)
+    return FileChatMessageHistory(_history_path(session_id))
 
-    file_path = os.path.join(directory, f"{session_id}.json")
-    return FileChatMessageHistory(file_path)
+
+def list_sessions(user_id):
+    """Return saved sessions for one user, newest first."""
+    os.makedirs(HISTORY_DIRECTORY, exist_ok=True)
+    prefix = f"{quote(str(user_id), safe='')}__"
+    sessions = []
+
+    for filename in os.listdir(HISTORY_DIRECTORY):
+        if not filename.startswith(prefix) or not filename.endswith(".json"):
+            continue
+
+        encoded_session_id = filename[len(prefix):-5]
+        session_id = unquote(encoded_session_id)
+        history = FileChatMessageHistory(os.path.join(HISTORY_DIRECTORY, filename))
+        messages = history.messages
+        user_messages = [message.content for message in messages if message.type == "human"]
+        title = user_messages[0][:42].strip() if user_messages else "New conversation"
+        sessions.append({
+            "session_id": session_id,
+            "title": title or "New conversation",
+            "updated_at": datetime.fromtimestamp(
+                os.path.getmtime(os.path.join(HISTORY_DIRECTORY, filename))
+            ),
+        })
+
+    return sorted(sessions, key=lambda item: item["updated_at"], reverse=True)
+
+
+def delete_session(user_id, session_id):
+    """Delete one persisted conversation without affecting other users."""
+    file_path = _history_path(f"{user_id}__{session_id}")
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 
 class FileChatMessageHistory(BaseChatMessageHistory):
