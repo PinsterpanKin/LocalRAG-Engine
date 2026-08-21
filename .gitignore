@@ -19,4 +19,7 @@ env/
 # 5. Ignoring local indices or data that RAG projects might generate
 data/
 index_storage/
+chroma_db/
+chat_history/
+history/
 *.log
