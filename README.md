@@ -13,11 +13,13 @@ and chat with them locally using Ollama-powered LLMs.
 - **Intelligent Retrieval** — Uses the `bge-m3` embedding model (via Ollama) to find relevant context.
 - **Context-Aware Chat** — Answers questions based on your documents using `llama3` (run via Ollama).
 - **Persistent Memory** — Chat history and metadata are saved locally for continuity.
+- **Multi-user Conversations** — Use a user name to keep separate local conversation workspaces.
+- **Session Management** — View saved conversations, create new sessions, and clear the current session from the chat sidebar.
 - **MD5 Deduplication** — Uploaded files are skipped if identical content has already been indexed.
 
 ### 🛠️ Tech Stack
 - **Core Framework**: LangChain
-- **UI**: Streamlit (`app_file_uploader.py`, `app_qa.py`)
+- **UI**: Streamlit (`app_file_uploader.py`, `interface/app_qa.py`)
 - **Vector DB**: ChromaDB (persisted to `chroma_db/`)
 - **Local LLM Engine**: Ollama (models: `llama3`, `bge-m3`)
 - **Language**: Python 3.12
@@ -83,10 +85,10 @@ Start the uploader (index documents):
 ./venv/bin/streamlit run app_file_uploader.py
 ```
 
-Start the QA chat interface:
+Start the QA chat interface from the project root:
 
 ```bash
-./venv/bin/streamlit run app_qa.py
+./venv/bin/streamlit run interface/app_qa.py
 ```
 
 If Streamlit prints `gio: http://localhost:8501: Operation not supported` on WSL, open the Local URL manually in your browser.
@@ -97,11 +99,13 @@ If Streamlit prints `gio: http://localhost:8501: Operation not supported` on WSL
   - `persist_directory` — where ChromaDB stores vectors (default: `chroma_db/`)
   - `md5_path` — `history/md5.txt` used to deduplicate uploads
   - chunking settings used by `knowledge_base.py`
+- `chat_history/` stores conversation JSON files locally and is excluded from Git.
+- `history/` stores upload deduplication data locally and is excluded from Git.
 
 ## Project structure
 
 - `app_file_uploader.py` — Streamlit uploader & indexer
-- `app_qa.py` — Streamlit chat frontend
+- `interface/app_qa.py` — Streamlit chat frontend with multi-user, multi-session history
 - `knowledge_base.py` — parsing, splitting and Chroma ingestion
 - `vector_stores.py` — Chroma vector store helper
 - `file_history_store.py` — local JSON chat history
@@ -112,6 +116,7 @@ If Streamlit prints `gio: http://localhost:8501: Operation not supported` on WSL
 - If you see "failed to connect to Ollama", ensure:
   - Ollama is installed and the API is running (`ollama ps`).
   - Required models have been pulled (`ollama pull ...`).
+- The chat UI supports local user profiles rather than account authentication. Do not use it as a security boundary for untrusted users.
 - To verify Python imports in the venv:
 
 ```bash
