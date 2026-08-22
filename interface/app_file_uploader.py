@@ -1,6 +1,12 @@
-#app_file_uploader
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 import streamlit as st
-from knowledge_base import KnowledgeBaseService, parse_text_from_bytes
+from services.knowledge_base import KnowledgeBaseService, parse_text_from_bytes
 
 SUPPORTED_TYPES = ['txt', 'md', 'pdf', 'html', 'htm', 'docx']
 
@@ -15,8 +21,7 @@ uploader_file = st.file_uploader(
 if "service" not in st.session_state:
     st.session_state["service"]=KnowledgeBaseService()
 
-/usr/local/bin/ollama pull llama3
-/usr/local/bin/ollama pull bge-m3if "counter" not in st.session_state:
+if "counter" not in st.session_state:
     st.session_state["counter"] = 0
 
 if uploader_file is not None:
