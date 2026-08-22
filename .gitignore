@@ -1,4 +1,9 @@
-#Initialized by PinsterpanKim
+#The project displayed on GitHub excludes:
+#virtual environment files
+#python bytecode
+#sensitive information like testing history
+#It also ignores system files and IDE configurations to keep the repository clean and focused on the essential code and resources.
+
 # 1.Ignoring Python bytecode and cache files (common practice)
 __pycache__/
 *.py[cod]
