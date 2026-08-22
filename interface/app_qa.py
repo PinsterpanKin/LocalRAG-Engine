@@ -9,8 +9,8 @@ if str(PROJECT_ROOT) not in sys.path:
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 
-from file_history_store import delete_session, get_history, list_sessions
-from rag import RagService
+from storage.file_history_store import delete_session, get_history, list_sessions
+from services.rag import RagService
 
 st.set_page_config(
     page_title="Local RAG Assistant",
@@ -106,7 +106,7 @@ with st.sidebar:
     with st.expander("📖 How to use", expanded=True):
         st.markdown(
             """
-            1. Open `app_file_uploader.py` and upload a document.
+            1. Open `interface/app_file_uploader.py` and upload a document.
             2. Return here and ask questions about the indexed content.
             3. Use **New conversation** to start a separate thread.
             4. Change **User name** to switch user workspaces.
