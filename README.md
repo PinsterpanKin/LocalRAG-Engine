@@ -19,7 +19,7 @@ and chat with them locally using Ollama-powered LLMs.
 
 ### 🛠️ Tech Stack
 - **Core Framework**: LangChain
-- **UI**: Streamlit (`app_file_uploader.py`, `interface/app_qa.py`)
+- **UI**: Streamlit (`interface/app_file_uploader.py`, `interface/app_qa.py`)
 - **Vector DB**: ChromaDB (persisted to `chroma_db/`)
 - **Local LLM Engine**: Ollama (models: `llama3`, `bge-m3`)
 - **Language**: Python 3.12
@@ -82,7 +82,7 @@ ollama run llama3
 Start the uploader (index documents):
 
 ```bash
-./venv/bin/streamlit run app_file_uploader.py
+./venv/bin/streamlit run interface/app_file_uploader.py
 ```
 
 Start the QA chat interface from the project root:
@@ -95,21 +95,21 @@ If Streamlit prints `gio: http://localhost:8501: Operation not supported` on WSL
 
 ## Configuration and storage
 
-- `config_data.py` defines:
+- `config/config_data.py` defines:
   - `persist_directory` — where ChromaDB stores vectors (default: `chroma_db/`)
   - `md5_path` — `history/md5.txt` used to deduplicate uploads
-  - chunking settings used by `knowledge_base.py`
+  - chunking settings used by `services/knowledge_base.py`
 - `chat_history/` stores conversation JSON files locally and is excluded from Git.
 - `history/` stores upload deduplication data locally and is excluded from Git.
 
 ## Project structure
 
-- `app_file_uploader.py` — Streamlit uploader & indexer
+- `interface/app_file_uploader.py` — Streamlit uploader & indexer
 - `interface/app_qa.py` — Streamlit chat frontend with multi-user, multi-session history
-- `knowledge_base.py` — parsing, splitting and Chroma ingestion
-- `vector_stores.py` — Chroma vector store helper
-- `file_history_store.py` — local JSON chat history
-- `rag.py` — RAG pipeline wiring with LangChain + Ollama
+- `services/knowledge_base.py` — parsing, splitting and Chroma ingestion
+- `services/vector_stores.py` — Chroma vector store helper
+- `storage/file_history_store.py` — local JSON chat history
+- `services/rag.py` — RAG pipeline wiring with LangChain + Ollama
 
 ## Notes & Troubleshooting
 
